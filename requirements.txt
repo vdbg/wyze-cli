@@ -1,0 +1,4 @@
+# pointing to a custom repo because my camera models aren't in the sdk and my pull request hasn't been looked at.
+# to use the regular wyze-sdk package, replace the next line with: wyze-sdk
+wyze-sdk @ git+https://github.com/vdbg/wyze-sdk@add_camera_models
+
