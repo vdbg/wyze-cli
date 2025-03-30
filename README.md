@@ -73,3 +73,14 @@ Once setup is confirmed correct, this will restart the Wyze cameras:
 
 Multiple docker containers can be created from the same image; in my case I have 3 of them: 
 wyze-restart, wyze-monitor-on, wyze-monitor-off.
+
+## Known issue
+
+The expiration date for the Wyze API key is a lie. Sometimes Wyze will silently delete
+the key with no warning or notification. The symptom will be a line of log similar to:
+```
+root - CRITICAL - 400 Client Error: Bad Request for url: https://auth-prod.api.wyze.com/api/user/login
+```
+
+Fix: head to [this page](https://developer-api-console.wyze.com/#/apikey/view) to confirm the api key
+has disappeared, create a new one, and update the `WYZE_KEY_ID` and `WUZE_API_KEY` settings.
