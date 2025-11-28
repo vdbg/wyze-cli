@@ -1,8 +1,5 @@
 import os
 from wyze_sdk import Client
-# from wyze_sdk.models.devices import Device
-# from wyze_sdk.errors import WyzeApiError
-
 from argparse import ArgumentParser
 
 import logging
@@ -28,7 +25,7 @@ def get_args():
             'power_on', 'power_off', 
             'motion_alarm_on', 'motion_alarm_off',
             'floodlight_on', 'floodlight_off',
-            'restart', 'list'
+            'restart', 'list', 'list_all'
             ],
         required=True,
         help='Type of action to perform.'
@@ -56,6 +53,13 @@ def get_args():
     return parser.parse_args()
 
 def perform_action(client: Client, include: list[str], exclude: list[str], action: str) -> int:
+    if action == "list_all":
+        all_devices = client.devices_list()
+        logging.info("If a camera is showing up here and missing with --list, update the fork https://github.com/vdbg/wyze-sdk/tree/add_camera_models:")
+        for device in all_devices:
+            logging.info(f"Found device: {device.nickname} with model {device.product.model}")
+        return 0
+            
     fail = 0
     success = 0
     logging.info(f"Include: {include}; exclude: {exclude}")

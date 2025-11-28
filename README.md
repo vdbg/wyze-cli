@@ -1,8 +1,10 @@
 # Wyze-CLI
 
-Connand-line app to easily manage some models of Wyze cameras (not all of them work). 
+Connand-line app to easily manage some models of Wyze cameras. Note: not all Wyze cameras support all actions. 
 
-My scenarios are turning on/off motion detection based on [geofencing](https://owntracks.org/) and restarting my cameras once a day. Before, I was using IFTTT for that scenarios until 
+My scenarios are turning on/off motion detection based on [geofencing](https://owntracks.org/), and restarting my cameras once a day. 
+
+I was using IFTTT to do that until 
 [they got greedy](https://www.reddit.com/r/ifttt/comments/18p7pxa/webhooks_suddenly_stopped_working_requires_pro/).
 
 ## Examples
@@ -12,7 +14,7 @@ Running the following from a sh terminal will turn off motion detection for all 
 python3 app.py --action motion_alarm_off --log-level=INFO --exclude='Outside Shed,Outside Kitchen,Front Door Bell' || echo "failed $? operation(s)"
 ```
 
-Note: no error is raised when specifying as exclude or include filters cameras that don't exist. 
+Note: filters are case sensitive, and no error is raised when specifying cameras that don't exist as exclude or include filters. 
 
 
 Other examples
@@ -23,7 +25,7 @@ python3 app.py --action restart --include "Kitchen pan"
 
 # Getting the credentials
 
-Needed are: wyze e-mail and password, and also api id and api key. 
+Needed: wyze e-mail, password, api id, and api key. 
 The latter two can be created [here](https://developer-api-console.wyze.com/#/apikey/view)
 
 
@@ -46,7 +48,6 @@ export WYZE_API_KEY=the_api_key
 python3 app.py --action restart --log-level=INFO
 ```
 
-Note: not all cameras support all actions. 
 
 ## From docker
 
@@ -74,7 +75,9 @@ Once setup is confirmed correct, this will restart the Wyze cameras:
 Multiple docker containers can be created from the same image; in my case I have 3 of them: 
 wyze-restart, wyze-monitor-on, wyze-monitor-off.
 
-## Known issue
+## Known issues
+
+### Expiring API key
 
 The expiration date for the Wyze API key is a lie. Sometimes Wyze will silently delete
 the key with no warning or notification. The symptom will be a line of log similar to:
@@ -83,4 +86,9 @@ root - CRITICAL - 400 Client Error: Bad Request for url: https://auth-prod.api.w
 ```
 
 Fix: head to [this page](https://developer-api-console.wyze.com/#/apikey/view) to confirm the api key
-has disappeared, create a new one, and update the `WYZE_KEY_ID` and `WUZE_API_KEY` settings.
+has disappeared, create a new one, and update the `WYZE_KEY_ID` and `WYZE_API_KEY` settings.
+
+### Missing cameras
+
+If a camera is missing when running `--list`, try running `--list-all`. If the camera appears when doing the latter, then 
+send a pull request to update https://github.com/vdbg/wyze-sdk/tree/add_camera_models
