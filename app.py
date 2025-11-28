@@ -1,9 +1,9 @@
+import logging
 import os
-from wyze_sdk import Client
+import sys
 from argparse import ArgumentParser
 
-import logging
-import sys
+from wyze_sdk import Client
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 
