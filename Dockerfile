@@ -1,4 +1,4 @@
-FROM python:3.11-alpine
+FROM python:3.13-alpine
 
 # Comment out the next 2 lines if using regular wyze-sdk in requirements.txt
 RUN apk update
