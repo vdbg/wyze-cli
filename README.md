@@ -7,18 +7,22 @@ My scenarios are turning on/off motion detection based on [geofencing](https://o
 I was using IFTTT to do that until 
 [they got greedy](https://www.reddit.com/r/ifttt/comments/18p7pxa/webhooks_suddenly_stopped_working_requires_pro/).
 
+## Requirements
+
+Python 3.10 or later installed.
+
 ## Examples
 
 Running the following from a sh terminal will turn off motion detection for all cameras but for the ones named "Outside Shed", "Outside Kitchen" or "Front Door Bell", and print "failed x operation(s)" with x a number if some cameras were unresponsive (which isn't uncommon - rebooting cameras once a day helps some):
-```
+```bash
 python3 app.py --action motion_alarm_off --log-level=INFO --exclude='Outside Shed,Outside Kitchen,Front Door Bell' || echo "failed $? operation(s)"
 ```
 
-Note: filters are case sensitive, and no error is raised when specifying cameras that don't exist as exclude or include filters. 
+Note: filters are case sensitive by default. Use `--case-insensitive` to make them case-insensitive. No error is raised when specifying cameras that don't exist as exclude or include filters. 
 
 
 Other examples
-```
+```bash
 python3 app.py --action motion_alarm_on --exclude "Front Door Bell"
 python3 app.py --action restart --include "Kitchen pan"
 ```
@@ -33,13 +37,15 @@ The latter two can be created [here](https://developer-api-console.wyze.com/#/ap
 
 ## From command line:
 
-`python3 app.py --action restart --wyze-email 'Wyze email' --wyze-password 'Wyze password' --wyze-key-id 'Wyze key id' --wyze-api-key 'Wyze api key'`
+```bash
+python3 app.py --action restart --wyze-email 'Wyze email' --wyze-password 'Wyze password' --wyze-key-id 'Wyze key id' --wyze-api-key 'Wyze api key'`
+```
 
 ## From command line with env variables
 
 Pro of env vars: these don't show up when doing `ps`
 
-```
+```bash
 export WYZE_EMAIL=your@email.com
 export WYZE_PASSWORD=some_strong_password
 export WYZE_KEY_ID=the_key_id
@@ -53,7 +59,7 @@ python3 app.py --action restart --log-level=INFO
 
 This sets a docker container to restart all Wyze cameras but 3 of them:
 
-```
+```bash
 sudo docker run \
   --name wyze-restart -d \
   -e WYZE_EMAIL=your@email.com \
@@ -81,7 +87,7 @@ wyze-restart, wyze-monitor-on, wyze-monitor-off.
 
 The expiration date for the Wyze API key is a lie. Sometimes Wyze will silently delete
 the key with no warning or notification. The symptom will be a line of log similar to:
-```
+```text
 root - CRITICAL - 400 Client Error: Bad Request for url: https://auth-prod.api.wyze.com/api/user/login
 ```
 
@@ -90,5 +96,5 @@ has disappeared, create a new one, and update the `WYZE_KEY_ID` and `WYZE_API_KE
 
 ### Missing cameras
 
-If a camera is missing when running `--list`, try running `--list-all`. If the camera appears when doing the latter, then 
+If a camera is missing when running `--action list`, try running `--action list_all`. If the camera appears when doing the latter, then 
 send a pull request to update https://github.com/vdbg/wyze-sdk/tree/add_camera_models
