@@ -30,7 +30,7 @@ def add_env(parser: ArgumentParser, key: str) -> None:
 
 def get_args() -> Namespace:
 
-    parser = ArgumentParser(description='Bulk manage Wyze cameras. Exit code is the number of failed operations (0 = success)',
+    parser = ArgumentParser(description='Bulk manage Wyze cameras. Exit code is the number of failed operations (0 = success; capped at 255)',
 formatter_class=RawTextHelpFormatter)
 
     parser.add_argument(
@@ -119,7 +119,7 @@ formatter_class=RawTextHelpFormatter)
 
 def to_list(s: str) -> list[str]:
 
-    return [item for item in s.split(',') if item.strip()]
+    return [item.strip() for item in s.split(',') if item.strip()]
 
 
 def list_all_devices(client: Client, sort: bool = False) -> int:
@@ -264,9 +264,17 @@ def refresh_and_save_token(args: Namespace) -> Client:
     if not saved or not saved.get("refresh_token"):
         raise ValueError("No saved Wyze refresh token")
     client = Client(token=saved.get("access_token"), refresh_token=saved["refresh_token"])
+    # wyze-sdk nests the rotated tokens under "data" in the refresh response
+    # (Client.refresh_token() reads response["data"]["access_token"] /
+    # response["data"]["refresh_token"]); the top level has no tokens.
     response = client.refresh_token()
+    data = response.get("data") or {}
+    access_token = data.get("access_token")
+    if not access_token:
+        logging.warning("Wyze refresh response had no access token under 'data'; keeping previous token cache")
+        return client
     try:
-        save_token(args.token_file, response.get("access_token") or client._token, response.get("refresh_token") or client._refresh_token or saved["refresh_token"])
+        save_token(args.token_file, access_token, data.get("refresh_token") or saved["refresh_token"])
     except OSError as e:
         logging.warning("Could not cache Wyze token in %s: %s", args.token_file, e)
     return client
@@ -348,7 +356,11 @@ try:
             logging.warning("Saved Wyze token rejected (%s); logging in once and retrying", e)
             ret = dispatch(args, login_and_save_token(args), regex_include, regex_exclude)
 
-    sys.exit(ret)
+    # Exit codes are 8 bits
+    if exit_code > 255:
+        exit_code = 255
+
+    sys.exit(exit_code)
 
 except Exception as e:
     logging.critical(e)
